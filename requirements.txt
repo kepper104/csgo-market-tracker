@@ -1,0 +1,5 @@
+schedule~=1.2.0
+numpy==1.24.2
+matplotlib==3.7.1
+telebot~=0.0.5
+steammarket~=0.2.7

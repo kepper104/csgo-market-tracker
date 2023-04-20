@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as m_dates
 from steammarket import get_csgo_item
 from os.path import isfile
-from config import TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, SENDING_TIME, tracked_cases
+from config import TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, SENDING_TIME, tracked_items
 
 bot = TeleBot(TELEGRAM_TOKEN)
 
@@ -26,22 +26,22 @@ logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 
-def get_price(case_name):
-    logger.debug("Getting price for " + case_name)
+def get_price(item_name):
+    logger.debug("Getting price for " + item_name)
     try:
-        price = get_csgo_item(case_name, "RUB")["lowest_price"].split(" ")[0].replace(",", ".")
+        price = get_csgo_item(item_name, "RUB")["lowest_price"].split(" ")[0].replace(",", ".")
         logger.debug(price)
     except:
         logger.critical("Steam Market API Error!")
         price = -1
-    logger.debug("Got price for " + case_name)
+    logger.debug("Got price for " + item_name)
 
     return price
 
 
-def write_to_csv(case_name, price_data):
-    logger.debug(f"Writing {price_data} to {case_name}")
-    path = f"./{case_name}.csv"
+def write_to_csv(item_name, price_data):
+    logger.debug(f"Writing {price_data} to {item_name}")
+    path = f"./{item_name}.csv"
 
     # If file doesn't exist, create it and put in headers
     if not isfile(path):
@@ -56,10 +56,10 @@ def write_to_csv(case_name, price_data):
     logger.debug("Wrote to csv successfully")
 
 
-def send_graph(case_name):
+def send_graph(item_name):
     logger.debug("Sending message")
-    # Read csv with data on given case
-    with open(f"./{case_name}.csv", mode='r') as csv_file:
+    # Read csv with data on given item
+    with open(f"./{item_name}.csv", mode='r') as csv_file:
         reader = csv.DictReader(csv_file)
         data = []
         for row in reader:
@@ -79,12 +79,12 @@ def send_graph(case_name):
     today_price = prices[-1]
 
     # Load the previous day's price from a file
-    prev_day_path = "prev_day_" + case_name + ".txt"
+    prev_day_path = "prev_day_" + item_name + ".txt"
     try:
         with open(prev_day_path, mode='r') as f:
             previous_day_price = float(f.read())
     except FileNotFoundError:
-        logger.warning("No prev day price file for " + case_name + " found! Creating one.")
+        logger.warning("No prev day price file for " + item_name + " found! Creating one.")
         previous_day_price = today_price
 
     # Calculate the price difference in RUB and percents from the previous day and week
@@ -94,18 +94,18 @@ def send_graph(case_name):
     day_price_diff_str = ("+" + f"{(today_price - previous_day_price):.2f}").replace("+-", "-") + "₽"
     week_price_diff_str = ("+" + f"{(today_price - prices[0]):.2f}").replace("+-", "-") + "₽"
 
-    # Write new previous price for given case
+    # Write new previous price for given item
     with open(prev_day_path, mode='w') as f:
         f.write(str(today_price))
 
     # Construct image with price plotted over last week
-    make_plot(data, timestamps, prices, week_price_diff_str, week_price_difference, case_name)
+    make_plot(data, timestamps, prices, week_price_diff_str, week_price_difference, item_name)
 
     # Construct message with quick access data
-    message = f"{' '.join(case_name.split()[:-1])}: {day_price_diff_str} {day_price_difference} " \
+    message = f"{item_name}: {day_price_diff_str} {day_price_difference} " \
               f"({previous_day_price} -> {today_price})\n "
     # Example:
-    # Glove: -0.22₽ -0.04% (506.26 -> 506.04)
+    # Glove Case: -0.22₽ -0.04% (506.26 -> 506.04)
     # From 2023-04-20 00:04:56 to 2023-04-20 00:18:37
 
     # Send a telegram message
@@ -130,7 +130,7 @@ def send_message(message, timestamps):
         logger.critical("Error while opening image:", e)
 
 
-def make_plot(data, timestamps, prices, week_price_diff_str, week_price_difference, case_name):
+def make_plot(data, timestamps, prices, week_price_diff_str, week_price_difference, item_name):
     fig, ax = plt.subplots()
     ax.plot([row['timestamp'] for row in data], [float(row['price']) for row in data])
 
@@ -141,7 +141,7 @@ def make_plot(data, timestamps, prices, week_price_diff_str, week_price_differen
     # Add labels and title to image
     ax.set_xlabel('Date')
     ax.set_ylabel('Price')
-    ax.set_title(f'{case_name} price over last week')
+    ax.set_title(f'{item_name} price over last week')
 
     # Set Y Ticks every 0.5 rubles
     y_ticks = np.arange(min(prices) - 1, max(prices) + 1, 0.5)
@@ -165,19 +165,19 @@ def make_plot(data, timestamps, prices, week_price_diff_str, week_price_differen
 
 
 def collect_price_data():
-    # Collect current datetime and price for each case and write them to csv
-    for case in tracked_cases:
+    # Collect current datetime and price for each item and write them to csv
+    for item in tracked_items:
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        price = get_price(case)
+        price = get_price(item)
 
         price_data = {'timestamp': timestamp, 'price': float(price)}
-        write_to_csv(case, price_data)
+        write_to_csv(item, price_data)
 
 
-# Send messages for every case in tracked cases list
+# Send messages for every item in tracked items list
 def send_graphs():
-    for case in tracked_cases:
-        send_graph(case)
+    for item in tracked_items:
+        send_graph(item)
 
 
 # Schedule running data collection every hour and sending data at set time
