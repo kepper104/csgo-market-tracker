@@ -136,11 +136,11 @@ def make_plot(data, timestamps, prices, week_price_diff_str, week_price_differen
     ax.plot([row['timestamp'] for row in data], [float(row['price']) for row in data])
 
     # Set x-axis locator and formatter to display ticks at daily intervals
-    ax.xaxis.set_major_locator(MaxNLocator(nbins=10, integer=True))
-    ax.xaxis.set_major_formatter(m_dates.DateFormatter('%I%p'))
+    # ax.xaxis.set_major_locator(MaxNLocator(nbins=10, integer=True))
+    # ax.xaxis.set_major_formatter(m_dates.DateFormatter('%I%p'))
 
-    # ax.xaxis.set_major_locator(m_dates.DayLocator())
-    # ax.xaxis.set_major_formatter(m_dates.DateFormatter('%Y-%m-%d'))
+    ax.xaxis.set_major_locator(m_dates.DayLocator())
+    ax.xaxis.set_major_formatter(m_dates.DateFormatter('%Y-%m-%d'))
     #
     # ax.xaxis.set_major_locator(m_dates.HourLocator())
     # ax.xaxis.set_major_formatter(m_dates.DateFormatter('%I%p'))
@@ -151,7 +151,9 @@ def make_plot(data, timestamps, prices, week_price_diff_str, week_price_differen
     ax.set_title(f'{item_name} price over last week')
 
     # Set Y Ticks every 0.5 rubles
-    y_ticks = np.arange(min(prices) - 1, max(prices) + 1, 0.5)
+    # ax.yaxis.set_major_locator(MaxNLocator(nbins=10, integer=True))
+
+    y_ticks = np.arange(min(prices) - 1, max(prices) + 1, max(prices) - min(prices) / 20)
     ax.set_yticks(y_ticks)
 
     # Add week's price change in right top corner
