@@ -7,6 +7,7 @@ import numpy as np
 from telebot import TeleBot
 import matplotlib.pyplot as plt
 import matplotlib.dates as m_dates
+from matplotlib.ticker import MaxNLocator
 from steammarket import get_csgo_item
 from os.path import isfile
 from config import TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, SENDING_TIME, tracked_items
@@ -95,8 +96,8 @@ def send_graph(item_name):
     week_price_diff_str = ("+" + f"{(today_price - prices[0]):.2f}").replace("+-", "-") + "₽"
 
     # Write new previous price for given item
-    with open(prev_day_path, mode='w') as f:
-        f.write(str(today_price))
+    # with open(prev_day_path, mode='w') as f:
+    #     f.write(str(today_price))
 
     # Construct image with price plotted over last week
     make_plot(data, timestamps, prices, week_price_diff_str, week_price_difference, item_name)
@@ -135,11 +136,14 @@ def make_plot(data, timestamps, prices, week_price_diff_str, week_price_differen
     ax.plot([row['timestamp'] for row in data], [float(row['price']) for row in data])
 
     # Set x-axis locator and formatter to display ticks at daily intervals
-    ax.xaxis.set_major_locator(m_dates.DayLocator())
-    ax.xaxis.set_major_formatter(m_dates.DateFormatter('%Y-%m-%d'))
-
-    ax.xaxis.set_major_locator(m_dates.HourLocator())
+    ax.xaxis.set_major_locator(MaxNLocator(nbins=10, integer=True))
     ax.xaxis.set_major_formatter(m_dates.DateFormatter('%I%p'))
+
+    # ax.xaxis.set_major_locator(m_dates.DayLocator())
+    # ax.xaxis.set_major_formatter(m_dates.DateFormatter('%Y-%m-%d'))
+    #
+    # ax.xaxis.set_major_locator(m_dates.HourLocator())
+    # ax.xaxis.set_major_formatter(m_dates.DateFormatter('%I%p'))
 
     # Add labels and title to image
     ax.set_xlabel('Date')
@@ -182,7 +186,8 @@ def send_graphs():
     for item in tracked_items:
         send_graph(item)
 
-
+send_graphs()
+exit()
 # Schedule running data collection every hour and sending data at set time
 schedule.every().hour.do(collect_price_data)
 schedule.every().day.at(SENDING_TIME).do(send_graphs)
