@@ -141,7 +141,7 @@ def make_plot(data, timestamps, prices, week_price_diff_str, week_price_differen
 
     ax.xaxis.set_major_locator(m_dates.DayLocator())
     ax.xaxis.set_major_formatter(m_dates.DateFormatter('%Y-%m-%d'))
-    
+
     # ax.xaxis.set_major_locator(m_dates.HourLocator())
     # ax.xaxis.set_major_formatter(m_dates.DateFormatter('%I%p'))
 
@@ -171,6 +171,8 @@ def make_plot(data, timestamps, prices, week_price_diff_str, week_price_differen
                 bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=0.3))
 
     fig.autofmt_xdate(rotation=45)
+    ax.grid(True, linestyle=':', linewidth=0.5, color='g')
+
     plt.savefig('price_graph.png')
 
 
