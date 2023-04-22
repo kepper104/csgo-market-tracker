@@ -138,6 +138,9 @@ def make_plot(data, timestamps, prices, week_price_diff_str, week_price_differen
     ax.xaxis.set_major_locator(m_dates.DayLocator())
     ax.xaxis.set_major_formatter(m_dates.DateFormatter('%Y-%m-%d'))
 
+    ax.xaxis.set_major_locator(m_dates.HourLocator())
+    ax.xaxis.set_major_formatter(m_dates.DateFormatter('%I%p'))
+
     # Add labels and title to image
     ax.set_xlabel('Date')
     ax.set_ylabel('Price')
