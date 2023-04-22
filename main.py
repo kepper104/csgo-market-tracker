@@ -96,8 +96,8 @@ def send_graph(item_name):
     week_price_diff_str = ("+" + f"{(today_price - prices[0]):.2f}").replace("+-", "-") + "₽"
 
     # Write new previous price for given item
-    # with open(prev_day_path, mode='w') as f:
-    #     f.write(str(today_price))
+    with open(prev_day_path, mode='w') as f:
+        f.write(str(today_price))
 
     # Construct image with price plotted over last week
     make_plot(data, timestamps, prices, week_price_diff_str, week_price_difference, item_name)
@@ -191,8 +191,7 @@ def send_graphs():
     for item in tracked_items:
         send_graph(item)
 
-send_graphs()
-exit()
+
 # Schedule running data collection every hour and sending data at set time
 schedule.every().hour.do(collect_price_data)
 schedule.every().day.at(SENDING_TIME).do(send_graphs)
