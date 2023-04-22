@@ -153,7 +153,7 @@ def make_plot(data, timestamps, prices, week_price_diff_str, week_price_differen
     # Set Y Ticks every 0.5 rubles
     # ax.yaxis.set_major_locator(MaxNLocator(nbins=10, integer=True))
 
-    y_ticks = np.arange(min(prices) - 1, max(prices) + 1, max(prices) - min(prices) / 20)
+    y_ticks = np.arange(min(prices) - 1, max(prices) + 1, (max(prices) - min(prices)) / 20)
     ax.set_yticks(y_ticks)
 
     # Add week's price change in right top corner
